@@ -39,13 +39,9 @@ class TouristRepository {
 
       final groups = await _sheetsService.fetchSheetData(date);
 
-      // Clear stale, old group records from Firestore to prevent visual misalignment
-      await _firestoreService.clearGroupsForDate(date);
-
-      // Upload each to Firestore (creates/updates docs)
-      for (final group in groups) {
-        await _firestoreService.syncGroup(date, group);
-      }
+      // Sync all groups in a single batch operation without clearing first
+      // This prevents connected clients from refreshing their UI completely
+      await _firestoreService.syncAllGroups(date, groups);
 
       // Sort chronologically by scheduled time ascending
       groups.sort((a, b) {

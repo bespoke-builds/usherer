@@ -10,6 +10,8 @@ class DefaultFirebaseOptions {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
+      case TargetPlatform.iOS:
+        return ios;
       case TargetPlatform.windows:
         return windows;
       default:
@@ -26,6 +28,15 @@ class DefaultFirebaseOptions {
     projectId: 'usherer-62ee6',
     authDomain: 'usherer-62ee6.firebaseapp.com',
     storageBucket: 'usherer-62ee6.firebasestorage.app',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyDOsVzBj9zkEfbWqNvDsvCAISX9EM7Br3Q',
+    appId: '1:228736580185:ios:0556e83bd9d708d3c68f48',
+    messagingSenderId: '228736580185',
+    projectId: 'usherer-62ee6',
+    storageBucket: 'usherer-62ee6.firebasestorage.app',
+    iosBundleId: 'com.usherer.usherer',
   );
 
   static const FirebaseOptions android = FirebaseOptions(

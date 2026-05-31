@@ -45,6 +45,46 @@ class FirestoreService {
         .set(group.toMap());
   }
 
+  // Performs a single batch operation to sync all groups without clearing them first
+  // This prevents the UI from refreshing completely when a new app instance connects
+  Future<void> syncAllGroups(String date, List<TouristGroup> groups) async {
+    final sheetId = AppConfig.spreadsheetId;
+
+    final batch = _firestore.batch();
+
+    // Write spreadsheet ID and active flag to parent document to make it discoverable
+    batch.set(
+      _firestore.collection('sessions').doc(date),
+      {
+        'active': true,
+        'spreadsheetId': sheetId,
+      },
+      SetOptions(merge: true),
+    );
+
+    final collectionRef = _firestore
+        .collection('sessions')
+        .doc(date)
+        .collection('groups');
+
+    // Fetch existing documents to find stale groups
+    final existingSnap = await collectionRef.get();
+    final newGroupIds = groups.map((g) => g.id).toSet();
+
+    for (final doc in existingSnap.docs) {
+      if (!newGroupIds.contains(doc.id)) {
+        batch.delete(doc.reference);
+      }
+    }
+
+    // Create/update current groups
+    for (final group in groups) {
+      batch.set(collectionRef.doc(group.id), group.toMap());
+    }
+
+    await batch.commit();
+  }
+
   // Any coordinator - mark tourist status (pickup/dropoff)
   // Use arrayRemove + arrayUnion pattern for nested tourist updates
   Future<void> markTouristStatus({

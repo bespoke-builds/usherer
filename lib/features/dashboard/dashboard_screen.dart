@@ -57,7 +57,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     Future.delayed(const Duration(milliseconds: 350), () async {
       if (!mounted) return;
 
-      final cardKey = _groupCardKeys[groupId];
+      var cardKey = _groupCardKeys[groupId];
       
       // If card key or context is null, scroll to estimated position first to force rendering
       if (cardKey == null || cardKey.currentContext == null) {
@@ -71,6 +71,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           // Wait a tiny bit for the item to render after scroll
           await Future.delayed(const Duration(milliseconds: 100));
         }
+        
+        // RE-FETCH the key now that the list item has built!
+        cardKey = _groupCardKeys[groupId];
       }
 
       if (!mounted) return;
@@ -80,9 +83,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       // Step 2: After one frame, scroll precisely to the group card
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (cardKey != null && cardKey.currentContext != null) {
+        // Re-fetch just in case it mounted in the current frame
+        cardKey ??= _groupCardKeys[groupId];
+        
+        if (cardKey != null && cardKey!.currentContext != null) {
           Scrollable.ensureVisible(
-            cardKey.currentContext!,
+            cardKey!.currentContext!,
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeOut,
             alignment: 0.0,
